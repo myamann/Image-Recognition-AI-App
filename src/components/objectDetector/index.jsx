@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useRef,useState} from 'react';
 import styled from "styled-components";
 
 import "@tensorflow/tfjs-backend-cpu";
@@ -15,7 +15,7 @@ align-items:center;
 
 const DetectorContainer = styled.div`
 min-width:200px;
-height:500px;
+height:700px;
 border: 3px solid #fff;
 border-radius:5px;
 display:Flex;
@@ -58,14 +58,38 @@ transition: all 260ms ease-in-out;
 
 export function ObjectDetector(props){
 
-    return <ObjectDetectorContainer>
-        <DetectorContainer>
-        Img
-        </DetectorContainer>
-        <HiddenFileInput type="file"/>
-        <SelectButton>
-            Select Image
-        </SelectButton>
-    </ObjectDetectorContainer>
+    const fileInputRef = useRef(null);
+    const [imgData, setImgData] = useState(null)
+
+    const openFilePicker = () => {
+        if (fileInputRef.current) fileInputRef.current.click();
+      };
+
+
+    const readImage = (file) => {
+        return new Promise((rs,rj)=> {
+            const fileReader = new FileReader();
+            fileReader.onload = () => rs(fileReader.result);
+            fileReader.onerror = () => rj(fileReader.error);
+            fileReader.readAsDataURL(file);
+
+        })
+    }  
+
+    const onSelectImage = async (e) => {
+        const file = e.target.files[0];
+        const imgData = await readImage(file);
+        setImgData(imgData);
+    }  
+
+    return (
+        <ObjectDetectorContainer>
+                <DetectorContainer>
+                  {imgData && <TargetImg src={imgData} alt="resim"/> }  
+                </DetectorContainer>
+                <HiddenFileInput type="file" ref={fileInputRef} onChange={onSelectImage}/>
+                <SelectButton onCLick={openFilePicker}> Select Image </SelectButton>
+         </ObjectDetectorContainer>
+         );
 
 }
