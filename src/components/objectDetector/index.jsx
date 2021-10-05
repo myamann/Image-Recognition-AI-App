@@ -65,6 +65,11 @@ export function ObjectDetector(props){
         if (fileInputRef.current) fileInputRef.current.click();
       };
 
+     const detectObjectOnImage = async (imageElement) => {
+        const model = await cocoSsd.load({});
+        const predictions = await model.detect(imageElement,6);
+        console.log("Predictin",predictions);
+     } 
 
     const readImage = (file) => {
         return new Promise((rs,rj)=> {
@@ -80,6 +85,13 @@ export function ObjectDetector(props){
         const file = e.target.files[0];
         const imgData = await readImage(file);
         setImgData(imgData);
+
+        const imageElement = document.createElement("img");
+        imageElement.src = imgData;
+
+        imageElement.onload = async () => {
+            await detectObjectOnImage(imageElement);
+        }
     }  
 
     return (
